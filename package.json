@@ -1,11 +1,17 @@
 {
   "name": "desarrollo-avanzado-de-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "productManager.js",
+  "type": "module",
   "scripts": {
+    "dev":"nodemon ./src/app.js",
+    "start":"node ./src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
 }
