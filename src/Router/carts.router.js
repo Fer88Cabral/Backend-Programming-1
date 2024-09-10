@@ -6,11 +6,11 @@ const router = Router();
 router.get('/:cid', (res, req) =>{
     const {cid} = req.params;
     const c = new CartsManager();
-    const result = c.getCartById(cid);
+    const result = c.getCartById(Number(cid));
     res.json({result});
 });
 
-router.post('/', (res, req) =>{
+router.post('/', (res, req) =>{  //post create
     const c = new CartsManager();
     const result = c.createCart();
     res.json({result});

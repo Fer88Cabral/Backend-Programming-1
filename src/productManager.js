@@ -44,34 +44,33 @@ class ProductManager{
         if(!title || !description || !price || !code || !stock || !category)
             result = 'Todos los parametros son requeridos [title, description, price, code, stock, category]';
         else{
-            //validar que no se repita el code
-            const codeRepetido = this.#products.some(p=> p.code == code);
+            const codeRepetido = this.#products.some(p=> p.code == code); //validar que no se repita el code
             if(codeRepetido)
                 result =`El codigo ${code} ya se encuentra registrado en otro producto`;
             else{
-                // id autoincremental 
-            ProductManager.idProducto = ProductManager.idProducto + 1; 
-            const id = this.#asignarIdProduto();
+                ProductManager.idProducto = ProductManager.idProducto + 1;  // id autoincremental 
+                const id = this.#asignarIdProduto();
 
-            const nuevoProducto = {
-                id,
-                title,
-                description,
-                price,
-                thumbnails,
-                code,
-                stock,
-                category,
-                status
-            };
-            this.#products.push(nuevoProducto);
-            this.#guardarArchivo();
-            result = {
-                msg : 'Producto agregado exitosamente',
+                const nuevoProducto = {
+                    id,
+                    title,
+                    description,
+                    price,
+                    thumbnails,
+                    code,
+                    stock,
+                    category,
+                    status
+                };
+                this.#products.push(nuevoProducto);
+                this.#guardarArchivo();
+                result = {
+                msg: 'Producto agregado exitosamente',
                 producto: nuevoProducto
-            }
+                };
             }
         }
+
         return result;
     }
 
@@ -105,16 +104,16 @@ class ProductManager{
             const {id, ...rest} = objetoUpdate;
             const propiedadesPermitidas = ['title', 'description', 'price', 'thumbnails', 'code', 'stock', 'category', 'status'];
             const propidadesActualizadas = Object.keys(rest)
-            .filter(propiedad => propiedadesPermitidas.includes(propiedad))
-            .reduce((obj, key)=>{
-                obj[key] = rest[key]
-                return obj;
-            }, {});
+                .filter(propiedad => propiedadesPermitidas.includes(propiedad))
+                .reduce((obj, key)=>{
+                    obj[key] = rest[key]
+                    return obj;
+                }, {});
             this.#products[index] = {...this.#products[index],...propidadesActualizadas};
             this.#guardarArchivo();
             result = {
                 msg: 'Producto actualizado',
-                product:this.#products[index]
+                producto:this.#products[index]
             };
         }
 

@@ -59,25 +59,25 @@ class CartsManager{
             return `Not Found del producto con id ${id}`;  
     }
 
-    addProductInCart(cid, pid) {
+    addProductInCart(cid, pid){
 
-        let respueta = `El carrito con id ${id} no existe`;
+        let respueta = `El carrito con id ${cid} no existe`;
 
         const indexCarrito = this.#carts.findIndex(c => c.id === cid);
         
         if(indexCarrito !== -1){
             const indexProductoInCart = this.#carts[indexCarrito].products.findIndex(p => p.id === pid);
-            const p = new ProductManager();
+            const p = new ProductManager(); 
             const producto = p.getProductById(pid);
 
             if(producto.status && indexProductoInCart === -1){
                 this.#carts[indexCarrito].products.push({id:pid, 'quantity': 1 });
                 this.#guardarArchivo();
-                respueta = 'Producto agregado al carrtio';
-            }else if (producto.status && indexProductoInCart !== -1){
+                respueta = 'Producto agregado al carrito';
+            }else if(producto.status && indexProductoInCart !== -1){
                 ++this.#carts[indexCarrito].products[indexProductoInCart].quantity;
                 this.#guardarArchivo();
-                respueta = 'Producto agregado al carrtio';
+                respueta = 'Producto agregado al carrito';
             }else{
                 respueta = `El Producto con id ${pid} no existe`;
             }
@@ -85,7 +85,6 @@ class CartsManager{
 
         return respueta;
     }
-
 
 }
 
