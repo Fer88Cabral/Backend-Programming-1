@@ -25,13 +25,13 @@ class ProductManager{
             
             return [];
         } catch (error) {
-            console.log(`Ocurrio un error eal momento de leer el archivo de producto, ${error}`);
+            console.log(`Ocurrio un error al momento de leer el archivo de producto, ${error}`);
         }
     }
 
     #guardarArchivo(){
         try {
-            fs.writeFileSync(this.#path, JSON.stringify(this.#products))
+            fs.writeFileSync(this.#path, JSON.stringify(this.#products));
         } catch (error) {
             console.log(`Ocurrio un error eal momento de guardar el archivo de producto, ${error}`);
         }

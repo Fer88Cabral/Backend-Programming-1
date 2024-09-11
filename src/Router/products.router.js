@@ -3,19 +3,19 @@ import ProductManager from '../productManager.js';
 
 const router = Router();
 
-router.get('/', (res, req) =>{
+router.get('/', (req,res) =>{
     const {limit} = req.query;
     const p = new ProductManager();
     return res.json({productos: p.getProducts(limit) });
 });
 
-router.get('/:pid', (res, req) =>{
+router.get('/:pid', (req,res) =>{
     const {pid} = req.params;
     const p = new ProductManager();
     return res.json({producto: p.getProductById(Number(pid))});
 });
 
-router.post('/', (res, req) =>{
+router.post('/', (req,res) =>{
     const {title, description, price, thumbnails, code, stock, category, status} = req.body;
     const p = new ProductManager();
     const result = p.addProduct(title, description, price, thumbnails, code, stock, category, status);

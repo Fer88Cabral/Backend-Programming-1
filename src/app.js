@@ -17,6 +17,6 @@ app.get('/',(req,res)=>{
     return res.send('Hola Mundo!')
 });
 // implementamos router
-app.use('/api/products ', productsRouter);
-app.use('/api/carts ', cartsRouter);
+app.use('/api/products', productsRouter);
+app.use('/api/carts', cartsRouter);
 
