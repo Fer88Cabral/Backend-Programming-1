@@ -19,4 +19,3 @@ app.get('/',(req,res)=>{
 // implementamos router
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
-
