@@ -4,11 +4,17 @@ import fs from 'fs'
 class ProductManager{
     #products;
     #path;
-    static idProducto = 0; //inciamos el procuto en 0 para auto incrementar
+
+    static #instance;
 
     constructor(){
+        if(ProductManager.#instance)
+            return ProductManager.#instance;
+        
         this.#path = './src/data/productos.json';
         this.#products = this.#leerProductosInFile();
+
+        ProductManager.#instance = this;
     }
 
     #asignarIdProduto(){
@@ -37,7 +43,7 @@ class ProductManager{
         }
     }
 
-    addProduct(title, description, price, thumbnails=[], code, stock, category, status = true ){
+    addProduct({title, description, price, thumbnails=[], code, stock, category, status = true}){
 
         let result = 'Ocurrio un error';
 
@@ -48,7 +54,6 @@ class ProductManager{
             if(codeRepetido)
                 result =`El codigo ${code} ya se encuentra registrado en otro producto`;
             else{
-                ProductManager.idProducto = ProductManager.idProducto + 1;  // id autoincremental 
                 const id = this.#asignarIdProduto();
 
                 const nuevoProducto = {
@@ -73,7 +78,6 @@ class ProductManager{
 
         return result;
     }
-
 
     getProducts(limit = 0){
         limit = Number(limit);

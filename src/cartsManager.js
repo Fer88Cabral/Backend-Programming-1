@@ -5,7 +5,6 @@ import ProductManager from './productManager.js'
 class CartsManager{
     #carts;
     #path;
-    static idProducto = 0; //inciamos el procuto en 0 para auto incrementar
 
     constructor(){
         this.#path = './src/data/carritos.json';

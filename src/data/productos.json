@@ -31,5 +31,38 @@
         "stock": 30,
         "category": "seguridad",
         "status": true
+    },
+    {
+        "id": 4,
+        "title": "Producto Nuevo 4",
+        "description": "Este es un nuevo producto 4",
+        "price": 400,
+        "thumbnails": [],
+        "code": "ABC126",
+        "stock": 40,
+        "category": "electricidad",
+        "status": true
+    },
+    {
+        "id": 5,
+        "title": "Producto Nuevo 5",
+        "description": "Este es un nuevo producto 5",
+        "price": "500",
+        "thumbnails": [],
+        "code": "ABC127",
+        "stock": "50",
+        "category": "Tecnología",
+        "status": true
+    },
+    {
+        "id": 6,
+        "title": "Producto Nuevo 6",
+        "description": "Este es un nuevo producto 6",
+        "price": "600",
+        "thumbnails": [],
+        "code": "ABC128",
+        "stock": "60",
+        "category": "seguridad",
+        "status": true
     }
 ]
