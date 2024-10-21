@@ -1,16 +1,31 @@
-import { Router } from 'express';
-import ProductManager from '../productManager.js';
+import { Router } from 'express'; 
+import {getProductsService} from '../services/products.js'; 
+import {getCartByIdService} from '../services/cart.js';
 
 const router = Router();
 
-router.get('/', (req, res) => {
-    const p = new ProductManager();
-    const productos = p.getProducts();
-    return res.render('home', {productos, styles:'styles.css'});
+router.get('/',async(req, res) =>{
+    const {payload} = await getProductsService({}); 
+    return res.render('home',{productos: payload, styles:'styles.css', title:'Home'});
 });
 
-router.get('/realtimeproducts', (req, res) => {
-    return res.render('realtimeproducts');
+router.get('/realtimeproducts',(req, res) =>{ 
+    return res.render('realTimeProducts', {title:'Real Time'});
 });
 
-export default router;
+router.get('/chat',(req, res) =>{
+    return res.render('chat', {styles:'chat.css', title:'Chat'});
+}); 
+
+router.get('/products', async(req,res) => {
+    const result = await getProductsService({...req.query});
+    return res.render('products', {title:'productos', result, styles:'products.css'})
+});
+
+router.get('/cart/:cid', async(req, res)=>{
+    const {cid} = req.params;
+    const carrito = await getCartByIdService(cid);
+    return res.render('cart', {Title:'carrito', carrito, styles:'cart.css'});
+});
+
+export default router;  

@@ -23,7 +23,7 @@ socket.on('productos', productos => {
 
 const formulario = document.getElementById('producto-form');
 
-formulario.addEventListener('submit', function(event){
+formulario.addEventListener('submit', function (event){
     event.preventDefault();
 
     //obtener valores del form
@@ -46,5 +46,5 @@ formulario.addEventListener('submit', function(event){
 
     socket.emit('agregarProducto', producto);
 
-    formulario.reset(); //limpial el form despues de enviar
+    formulario.reset(); //limpia el form despues de enviar
 });

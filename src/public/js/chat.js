@@ -1,56 +1,67 @@
 const socket = io();
 
-// Creación de elementos del DOM y variables auxiliares
-let user; //Este "user" será con el que el cliente se identificará para saber quién escribió el mensaje.
-let chatBox = document.getElementById('chatbox'); //Obtenemos la referencia del cuadro donde se escribirá.
+let user;
+let chatBox = document.getElementById('chatBox');
+let log = document.getElementById('messageLogs');
+let data;
 
-//Alerta de identificación
-Swal.fire({
-    title:"Identifícate",
-    input: 'text', //Indicamos que el cliente nececsita escribir un texto para poder avanzar en la alerta.
-    text:"Ingresa tu usuario para identificarte en el chat.",
-    inputValidator: (value) => {
-        return !value && 'Necesitas escribir un nombre de usuario para continuar.'
-        //Esta validación ocurre si el usuario decide dar en "continuar" sin haber colocado un nombre de usuario.
-    },
-    allowOutsideClick: false //Impide que el usuario salga de la alerta al dar "click" fuera de la alerta
-}).then(result => {
-    user = result.value;
-    document.getElementById('username').textContent = user;
-    socket.emit('userAuthenticated', {user: user});
-    //Una vez que el usuario se identifica, lo asignamos a la variable user.
+socket.on('message', msg => {
+    data = msg;
+}); 
+
+socket.on('messageLogs', msgs => {
+    renderizar(msgs);
 });
 
-//Event listener para el input del chat
-chatBox.addEventListener('keyup', (evt) => {
-    if (evt.key === 'Enter') { //El mensaje se enviará cuando el usuario apriete "Enter" en la caja de chat
-        if (chatBox.value.trim().length) {//Corroboramos que el mensaje no esté vacío o sólo contenga espacios.
-            socket.emit('message', {user: user, message : chatBox.value}); //Emitimos nuestro primer evento.
+const renderizar = (msgs) =>{
+    let messages = '';
+
+    msgs.forEach(message => {
+        const isCurrentUser = message.user === user;
+        const messageClass = isCurrentUser ? 'my-message' : 'other-message';
+        messages = messages + `<div class="${messageClass}">${message.user} : ${message.message}</div>`;
+    });
+    log.innerHTML = messages;
+    chatBox.scrollIntoView(false);
+}
+
+swal.fire({
+    title: 'Identificate',
+    input: 'email',
+    text: 'Ingresa tu correo electronico para identificarte',
+    inputValidator: (value) => {
+        if(!value)
+            return 'Necesita ingresar un correo electronico para continuar';
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //expresion regular para validar que sea un email valido 
+
+        if(!emailRegex.test(value))
+                return 'Ingresa un correo electronico valido';
+
+        return null;
+    },
+    allowOutsideClick: false
+}).then(result => {   // captura el resultado
+    if(result.isConfirmed) {
+        user = result.value;
+        renderizar(data)
+    }
+});
+
+chatBox.addEventListener('keyup', evt => {
+    if(evt.key === 'Enter') {
+        if(chatBox.value.trim().length > 0){
+            const message = chatBox.value;
+            socket.emit('message', {user,message});
             chatBox.value = '';
         }
     }
-})
+});
 
-//Escuchar el evento 'messageLogs' en el cliente y actualizra la lista de mensajes
-socket.on('messageLogs', (data) => {
-    let log = document.getElementById('messageLogs');
-    let messagesHtml = "";
-    data.forEach(message => {
-        messagesHtml += `${message.user} dice: ${message.message}<br>`;
-    });
-    log.innerHTML = messagesHtml;
-})
-
-//Escuchar si se conecta un usuario nuevo
-socket.on('newUserConnected', newUser => {
-    // Mostrar una notificación usando SweetAlert2
+socket.on('nuevo_user', () =>{
     Swal.fire({
-        text:"Nuevo usuario conectado",
+        text: 'Nuevo usuario se ha conectado',
         toast: true,
-        position: 'top-right',
-        icon: 'info',
-        title: `${newUser.user} se ha unido al chat`,
-        showConfirmButton: false,
-        timer: 5000
+        position:'top-right'
     });
 });

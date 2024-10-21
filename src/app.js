@@ -1,47 +1,61 @@
+import express from "express"; 
+import { Server } from "socket.io";
+import { engine } from "express-handlebars";
+import 'dotenv/config';
 
-import express from 'express'; //Configurar el servidor Express
-import { engine } from 'express-handlebars'; // Importar'engine'
-import { Server } from 'socket.io'; // Importamos el constructor de un servidor de sockets
-
-// Importamos los routers
-import productsRouter from './Router/products.router.js';
-import cartsRouter from './Router/carts.router.js';
-import viewsRouter from './Router/views.router.js';
-import __dirname from './utils.js';
-import ProductManager from './productManager.js';
+import products from './Router/products.router.js'
+import carts from './Router/carts.router.js'
+import views from './Router/views.router.js'
+import __dirname from "./utils.js";                     
+import {dbConnection} from "./database/config.js"
+import { productModel } from "./dao/models/product.js";
+import {messageModel} from "./dao/models/messages.js";
 
 const app = express();
+const PORT = process.env.PORT; //8080;              
 
-const p = new ProductManager();
-
-// Middleware para analizar el cuerpo de las solicitudes
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); //para recibie info json
+app.use(express.urlencoded({extended: true})); //esto sirve cuando se enviar peticiones atravez de formularios html, esto hace serializar, transforma toda la data para poder leer.
 app.use(express.static(__dirname + '/public'));
 
-// Configuramos todo lo referente a las plantillas
-app.engine('handlebars', engine()); 
+app.engine('handlebars', engine());
 app.set('views', __dirname + '/views');
 app.set('view engine', 'handlebars');
 
-// Usamos el enrutador para las vistas
-app.use('/', viewsRouter);
-app.use('/api/products', productsRouter);
-app.use('/api/carts', cartsRouter);
+app.use('/', views);
+app.use('/api/products', products);
+app.use('/api/carts', carts);
 
-// Servidor express
-const expressServer = app.listen(8080, () => {console.log('Listening on PORT 8080');});
-// Creamos un servidor de sockets 
-const io = new Server(expressServer);
+await dbConnection();
 
-io.on('connection', socket => {
+const expressServer = app.listen(PORT, () => {console.log(`Corriendo aplicacion en el puerto ${PORT}`);});
+const io = new Server (expressServer);
 
-    const productos = p.getProducts(); // Obtengo todos los productos
+io.on ('connection', async(socket) =>{
+
+    //Products
+    const productos = await productModel.find(); 
     socket.emit('productos', productos);
 
-    socket.on('agregarProducto', producto => {
-        const result = p.addProduct({ ...producto });
-        if(result.producto)
-        socket.emit('productos', result.producto);
+    socket.on('agregarProducto', async (producto)=>{
+        const newProduct = await productModel.create({...producto}); 
+        if(newProduct){
+            productos.push(newProduct)
+            socket.emit('productos', productos);
+        }
     });
+
+    // Chat messages
+    const messages = await messageModel.find(); //obtenemos todos nuestros modelos
+    socket.emit('message', messages);
+
+    socket.on('message', async (data) => {
+        const newMessage = await messageModel.create({...data});
+        if(newMessage){
+            const messages = await messageModel.find(); 
+            io.emit('messageLogs', messages)
+        }
+    });
+
+    socket.broadcast.emit('nuevo_user');
 });
