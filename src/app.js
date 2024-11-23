@@ -1,22 +1,46 @@
+//librerias
 import express from "express"; 
 import { Server } from "socket.io";
 import { engine } from "express-handlebars";
+import session from "express-session";
+import MongoStore from "connect-mongo";
+import passport from "passport";
 import 'dotenv/config';
 
-import products from './Router/products.router.js'
-import carts from './Router/carts.router.js'
-import views from './Router/views.router.js'
-import __dirname from "./utils.js";                     
-import {dbConnection} from "./database/config.js"
-import { productModel } from "./dao/models/product.js";
-import {messageModel} from "./dao/models/messages.js";
+import products from './routes/product.router.js';
+import carts from './routes/carts.router.js';
+import views from './routes/views.router.js';
+import __dirname from "./utlis.js";
+import { dbConnection } from "./database/config.js";
+import { messageModel } from "./dao/mongo/models/messagesModel.js";
+import {ProductsRepository} from "./repositories/index.js"
+import {initializaPassport} from "./config/passport.js";
 
 const app = express();
-const PORT = process.env.PORT; //8080;              
+const PORT = process.env.PORT;
 
-app.use(express.json()); //para recibie info json
-app.use(express.urlencoded({extended: true})); //esto sirve cuando se enviar peticiones atravez de formularios html, esto hace serializar, transforma toda la data para poder leer.
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+
+app.use(session({
+    store: MongoStore.create({
+        mongoUrl: process.env.URI_MONGO_DB, //`${process.env.URI_MONGO_DB}/${process.env.NAME_DB}`,
+        dbName: process.env.NAME_DB,
+        collectionName: 'sessions', // Nombre de la colección de sesiones
+        ttl: 3600, // tiempo de expiración de la sesión
+        //autoRemove: 'native' // Elimina automáticamente las sesiones expiradas
+    }),
+    secret: process.env.SECRET_SESSION,
+    saveUninitialized: true,
+    resave: false
+}));
+
+// Configuracion del passport
+initializaPassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 app.engine('handlebars', engine());
 app.set('views', __dirname + '/views');
@@ -28,32 +52,36 @@ app.use('/api/carts', carts);
 
 await dbConnection();
 
-const expressServer = app.listen(PORT, () => {console.log(`Corriendo aplicacion en el puerto ${PORT}`);});
-const io = new Server (expressServer);
+const expressServer = app.listen(PORT, () => {
+    console.log(`Corriendo aplicación en el puerto ${PORT}`);
+});
 
-io.on ('connection', async(socket) =>{
+const io = new Server(expressServer);
 
-    //Products
-    const productos = await productModel.find(); 
-    socket.emit('productos', productos);
-
-    socket.on('agregarProducto', async (producto)=>{
-        const newProduct = await productModel.create({...producto}); 
-        if(newProduct){
-            productos.push(newProduct)
+io.on('connection', async (socket) => {
+    
+    // Products
+    const limit = 50;
+    const { payload } = await ProductsRepository.getProducts({limit});
+    const productos = payload;
+    socket.emit('productos', payload);
+    socket.on('agregarProducto', async (producto) => {
+        const newProduct = await ProductsRepository.addProduct({ ...producto });
+        if (newProduct) {
+            productos.push(newProduct);
             socket.emit('productos', productos);
         }
     });
 
     // Chat messages
-    const messages = await messageModel.find(); //obtenemos todos nuestros modelos
+    const messages = await messageModel.find();
     socket.emit('message', messages);
 
     socket.on('message', async (data) => {
-        const newMessage = await messageModel.create({...data});
-        if(newMessage){
-            const messages = await messageModel.find(); 
-            io.emit('messageLogs', messages)
+        const newMessage = await messageModel.create({ ...data });
+        if (newMessage) {
+            const messages = await messageModel.find();
+            io.emit('messageLogs', messages);
         }
     });
 

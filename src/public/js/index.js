@@ -46,5 +46,5 @@ formulario.addEventListener('submit', function (event){
 
     socket.emit('agregarProducto', producto);
 
-    formulario.reset(); //limpia el form despues de enviar
+    formulario.reset(); //limpial el form despues de enviar
 });

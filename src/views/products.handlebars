@@ -1,3 +1,5 @@
+{{> header}}
+
 <div>
     <h3>Lista de Productos:</h3>
 
@@ -73,7 +75,7 @@
 
     <script>
         function addToCart(productId) {
-            const idCart = '6715bc0971468c148def65fb';
+            const idCart = '664e882595d07112f9ca4808';
             fetch(`/api/carts/${idCart}/product/${productId}`,{
                 method:'POST',
                 headers:{
